@@ -801,6 +801,5 @@ async function autoPlay(){
         randomizeCube();
         await solve();
         await delay(1000);
-        breaking;
     }
 }
