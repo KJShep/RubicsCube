@@ -34,14 +34,14 @@ class Center{
 
 //corner pieces: 8
 var corner = [];
-var cornerPiece0 = new Corner("orange","blue","white");//whites
-var cornerPiece1 = new Corner("green","orange","white");
-var cornerPiece2 = new Corner("red","green","white");
-var cornerPiece3 = new Corner("blue","red","white");
-var cornerPiece4 = new Corner("orange","blue","yellow");//yellows
-var cornerPiece5 = new Corner("green","orange","yellow");
-var cornerPiece6 = new Corner("red","green","yellow");
-var cornerPiece7 = new Corner("blue","red","yellow");
+var cornerPiece0 = new Corner("orange0c","blue0c","white0c");//whites
+var cornerPiece1 = new Corner("green1c","orange1c","white1c");
+var cornerPiece2 = new Corner("red2c","green2c","white2c");
+var cornerPiece3 = new Corner("blue3c","red3c","white3c");
+var cornerPiece4 = new Corner("orange4c","blue4c","yellow4c");//yellows
+var cornerPiece5 = new Corner("green5c","orange5c","yellow5c");
+var cornerPiece6 = new Corner("red6c","green6c","yellow6c");
+var cornerPiece7 = new Corner("blue7c","red7c","yellow7c");
 
 corner.push(cornerPiece0);
 corner.push(cornerPiece1);
@@ -54,18 +54,18 @@ corner.push(cornerPiece7);
 
 //edges: 12
 var edge = [];
-var edge0 = new Edge("blue","white");
-var edge1 = new Edge("orange","white");
-var edge2 = new Edge("green","white");
-var edge3 = new Edge("red","white");
-var edge4 = new Edge("orange","blue");
-var edge5 = new Edge("green","orange");
-var edge6 = new Edge("red","green");
-var edge7 = new Edge("blue","red");
-var edge8 = new Edge("blue","yellow");
-var edge9 = new Edge("orange","yellow");
-var edge10 = new Edge("green","yellow");
-var edge11 = new Edge("red","yellow");
+var edge0 = new Edge("blue0e","white0e"); //all end in "e" for edge key
+var edge1 = new Edge("orange1e","white1e");
+var edge2 = new Edge("green2e","white2e");
+var edge3 = new Edge("red3e","white3e");
+var edge4 = new Edge("orange4e","blue4e");
+var edge5 = new Edge("green5e","orange5e");
+var edge6 = new Edge("red6e","green6e");
+var edge7 = new Edge("blue7e","red7e");
+var edge8 = new Edge("blue8e","yellow8e");
+var edge9 = new Edge("orange9e","yellow9e");
+var edge10 = new Edge("greenae","yellowae");//a = 10
+var edge11 = new Edge("redbe","yellowbe");//b = 11
 
 edge.push(edge0);
 edge.push(edge1);
@@ -82,12 +82,12 @@ edge.push(edge11);
 
 //centers: 6
 var center = []; //never going to move, constant
-var white = new Center("white");
-var blue = new Center("blue");
-var orange = new Center("orange");
-var green = new Center("green");
-var red = new Center("red");
-var yellow = new Center("yellow");
+var white = new Center("white0C");
+var blue = new Center("blue1C");
+var orange = new Center("orange2C");
+var green = new Center("green3C");
+var red = new Center("red4C");
+var yellow = new Center("yellow5C");
 
 center.push(white);
 center.push(blue);
@@ -188,7 +188,7 @@ function drawCube(){
     for(let key in squareDict){
         var arrCoord = key.split(",").map(Number); //[x,y]
 
-        cc.fillStyle = squareDict[key];
+        cc.fillStyle = squareDict[key].slice(0,-2);
         cc.fillRect(squareSide*arrCoord[0], squareSide*arrCoord[1], squareSide,squareSide);
         cc.strokeRect(squareSide*arrCoord[0], squareSide*arrCoord[1], squareSide,squareSide);
     }
@@ -448,6 +448,7 @@ var faces = [face0,face1,face2,face3,face4,face5];
 var xSquare = null;
 var ySquare = null;
 
+
 //Logic Start >:)
 var turnCounter = 0;
 canvas.addEventListener("mousedown", function(event){
@@ -496,11 +497,9 @@ canvas.addEventListener("mousedown", function(event){
 
 
     if(clockwise){
-        swapSections(groups[0],groups[1],groups[2],groups[3]);
-         turnStack.push([0,faceClicked]);
+        turnStack.push([0,faceClicked]);
     }
     else{
-        swapSections(groups[3],groups[2],groups[1],groups[0]);
         turnStack.push([1,faceClicked]);
     }
 
@@ -518,6 +517,8 @@ canvas.addEventListener("mousedown", function(event){
     findSquareClicked(x,y);
     */
    turnStackUndo = [];
+
+   //for tracking turns but didnt end up working.
     /*
     var groupsPrevious = getGroups(turnStack.at(-2)[1]);
     if(turnStack.length > 0 && groupsPrevious[4] == groups[4]){
@@ -577,10 +578,10 @@ function getGroups(face){
         group5 = "Red";
     }
     else if(face == face5){// yellow
-        group1 = ["8,3","8,4","8,5"];
-        group2 = ["5,0","4,0","3,0"];
-        group3 = ["0,3","0,4","0,5"];
-        group4 = ["3,8","4,8","5,8"];
+        group4 = ["8,3","8,4","8,5"];
+        group3 = ["5,8","4,8","3,8"];
+        group2 = ["0,5","0,4","0,3"];
+        group1 = ["3,0","4,0","5,0"];
         group5 = "Yellow";
     }
 
@@ -610,6 +611,11 @@ function Rotate1DSquareMatrixClockwise(matrix){
         squareDict[key] = oldMapping[result[index]];
         index++;
     }
+    
+    //rotation done so now turn the other pieces that need to be swapped
+
+    var groups = getGroups(matrix);//groups[4] = color that was clicked... Used to know what color was clicked when displaying previous turns
+    swapSections(groups[0],groups[1],groups[2],groups[3]);
 
     drawCube();
     //return result;
@@ -637,6 +643,11 @@ function Rotate1DSquareMatrixCounterClockwise(matrix){
         squareDict[key] = oldMapping[result[index]];
         index++;
     }
+
+    //rotation done so now turn the other pieces that need to be swapped
+
+    var groups = getGroups(matrix);//groups[4] = color that was clicked... Used to know what color was clicked when displaying previous turns
+    swapSections(groups[3],groups[2],groups[1],groups[0]);
 
     drawCube();
     //return result;
@@ -719,12 +730,12 @@ function randomizeCube(){
 
         if(clockwiseTurn == 0){ //clockwise
             Rotate1DSquareMatrixClockwise(faces[faceNum]);
-            swapSections(groups[0],groups[1],groups[2],groups[3]);
+            //swapSections(groups[0],groups[1],groups[2],groups[3]);
             turnStack.push([0,faces[faceNum]]);
         }
         else{
             Rotate1DSquareMatrixCounterClockwise(faces[faceNum]);
-            swapSections(groups[3],groups[2],groups[1],groups[0]);
+            //swapSections(groups[3],groups[2],groups[1],groups[0]);
             turnStack.push([1,faces[faceNum]]);
         }
 
@@ -741,11 +752,11 @@ async function solve(){
         var groups = getGroups(movement[1]);
         if(movement[0] == 0){//originally turned clockwise so now go cc
             Rotate1DSquareMatrixCounterClockwise(movement[1]);
-            swapSections(groups[3],groups[2],groups[1],groups[0]);
+            //swapSections(groups[3],groups[2],groups[1],groups[0]);
         }
         else{
             Rotate1DSquareMatrixClockwise(movement[1]);
-            swapSections(groups[0],groups[1],groups[2],groups[3]);
+            //swapSections(groups[0],groups[1],groups[2],groups[3]);
         }
         await delay(100);
     }
@@ -759,12 +770,12 @@ function undoTurn(){
         var groups = getGroups(movement[1]);
         if(movement[0] == 0){//originally turned clockwise so now go cc
             Rotate1DSquareMatrixCounterClockwise(movement[1]);
-            swapSections(groups[3],groups[2],groups[1],groups[0]);
+            //swapSections(groups[3],groups[2],groups[1],groups[0]);
             turnStackUndo.push([1,movement[1]]);
         }
         else{
             Rotate1DSquareMatrixClockwise(movement[1]);
-            swapSections(groups[0],groups[1],groups[2],groups[3]);
+            //swapSections(groups[0],groups[1],groups[2],groups[3]);
             turnStackUndo.push([1,movement[1]]);
         }
     }
@@ -776,12 +787,12 @@ function redoTurn(){
         var groups = getGroups(movement[1]);
         if(movement[0] == 0){//undoing the undo
             Rotate1DSquareMatrixCounterClockwise(movement[1]);
-            swapSections(groups[3],groups[2],groups[1],groups[0]);
+            //swapSections(groups[3],groups[2],groups[1],groups[0]);
             turnStack.push([1,movement[1]]);
         }
         else{
             Rotate1DSquareMatrixClockwise(movement[1]);
-            swapSections(groups[0],groups[1],groups[2],groups[3]);
+            //swapSections(groups[0],groups[1],groups[2],groups[3]);
             turnStack.push([0,movement[1]]);
         }
     }
@@ -802,4 +813,150 @@ async function autoPlay(){
         await solve();
         await delay(1000);
     }
+}
+
+function getFaceString(myCoord){//"3,4" -> "white"
+    for(let face of faces){
+        for(let coord of face){
+            if(myCoord == coord){
+                return squareDict[face[4]].slice(0,-2);
+            }
+        }
+    }
+}
+
+function getFaceArray(myCoord){
+    for(let face of faces){
+        for(let coord of face){
+            if(myCoord == coord){
+                return face;
+            }
+        }
+    }
+}
+
+function updatePiecePos(name){
+    for(let key in squareDict){
+        if(squareDict[key] == name){
+            return key;
+        }
+    }
+}
+
+//now attempting to add my own solving algorithm.
+async function crossCFOP(){
+    //blue, orange, green, red
+    var updatePieces = [["blue0e","white0e"],["orange1e","white1e"],["green2e","white2e"],["red3e","white3e"]]
+
+    for(let piece of updatePieces){
+        //edge[0] = blue/white
+        var be = piece[0];//blue edge
+        var bePos = updatePiecePos(be); //"4,2" at start for example
+        var we = piece[1]; //white edge
+        var wePos = updatePiecePos(we);
+
+        //if white is on yellow face, turn till over blue and then rotate twice.
+        var whiteSpotsFace = getFaceString(wePos);
+        var blueSpotsFace = getFaceString(bePos);
+
+        //if white on : blue/green -> up down rotation
+        //if white on : orange/red -> left right rotation
+        if(whiteSpotsFace == "blue" && blueSpotsFace == "red" || whiteSpotsFace == "green" && blueSpotsFace == "orange" || whiteSpotsFace == "orange" && blueSpotsFace == "blue" || whiteSpotsFace == "red" && blueSpotsFace == "green"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
+            wePos = updatePiecePos(we);
+            await delay(100);
+
+            Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
+            wePos = updatePiecePos(we);
+            await delay(100);
+
+            //turn piece back
+            //purposly didnt update blue piece pos to remember which piece to turn back
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            bePos = updatePiecePos(be); //then we update it
+            await delay(100);
+
+        }
+        else if (blueSpotsFace == "yellow"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
+            bePos = updatePiecePos(be);
+            await delay(100);
+
+            Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
+            await delay(100);
+
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellow5C")));//rotate yellow face
+            await delay(100);
+
+            //undo the moves
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            await delay(100);
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(wePos));
+            bePos = updatePiecePos(be);//then we update it
+            wePos = updatePiecePos(we);
+            await delay(100);
+
+        }
+        else if(blueSpotsFace == "white"){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(wePos));
+            bePos = updatePiecePos(be);
+            await delay(100);
+
+            Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
+            await delay(100);
+
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellow5C")));//rotate yellow face
+            await delay(100);
+
+            //undo the moves
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            await delay(100);
+            Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
+            bePos = updatePiecePos(be);//then we update it
+            wePos = updatePiecePos(we);
+            await delay(100);
+        }
+        else if(whiteSpotsFace != "white" && whiteSpotsFace != "yellow"){//(whiteSpotsFace == "blue" && blueSpotFace == "orange" || whiteSpotsFace == "green" && blueSpotFace == "red" || whiteSpotsFace == "orange" && blueSpotsFace == "green" || whiteSpotsFace == "red" && blueSpotsFace == "blue") 
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            wePos = updatePiecePos(we);
+            await delay(100);
+
+            Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
+            wePos = updatePiecePos(we);
+            await delay(100);
+
+            //turn piece back
+            //purposly didnt update blue piece pos to remember which piece to turn back
+            Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
+            bePos = updatePiecePos(be);//then we update it
+            await delay(100);
+        }
+        else if(whiteSpotsFace == "white" && blueSpotsFace != piece[0].slice(0,-2)){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            await delay(100);
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            await delay(100);
+            wePos = updatePiecePos(we);//then we update it
+        }
+        
+        //twist from top into position
+        whiteSpotsFace = getFaceString(wePos);
+        blueSpotsFace = getFaceString(bePos);
+        if(whiteSpotsFace == "yellow"){ //on yellow face.
+            //now put blue in blue territory and rotate blue twice
+            while(getFaceString(bePos) != piece[0].slice(0,-2)){
+                Rotate1DSquareMatrixCounterClockwise(getFaceArray(wePos));
+
+                //update bePos
+                bePos = updatePiecePos(be);
+
+                await delay(100);
+            }
+            //white now on yellow face and blue is in blue. Turn twice
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            await delay(100);
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
+            await delay(100);
+        }
+    } 
 }
