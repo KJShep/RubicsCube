@@ -960,3 +960,28 @@ async function crossCFOP(){
         }
     } 
 }
+
+function F2LCFOP(){
+
+    //Corner("orange0c","blue0c","white0c");
+    var oc = "orance0c";
+    var bc = "blue0c";
+    var wc = "white0c";
+
+    var ocPos = updatePiecePos(oc);
+    var bcPos = updatePiecePos(bc);
+    var wcPos = updatePiecePos(wc);
+
+    //Edge equivalent
+    //Edge("orange4e","blue4e");
+    var oe = "orange4e";
+    var be = "blue4e";
+
+    var oePos = updatePiecePos(oe);
+    var bePos = updatePiecePos(be);
+
+    if(getFaceString(oePos) != "yellow"){//not on top with the corner piece, so you have to pull it out
+        while(getFaceString()){}
+    }
+}
+
