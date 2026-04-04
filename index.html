@@ -1,20 +1,62 @@
 <!DOCTYPE html>
 <html>
     <body>
-        <p id="TESTING">Tester</p>
-        <p id="arrow">Arrow Key</p>
-        <p id="TurnCounter">Turn Counter</p>
-        <p id="turns">Turns:</p>
+        <input type="text" id="changeMainCanvasInput" placeholder="Change Main Canvas Screenshot">
         <canvas id="myCanvas" width="600" height="450"></canvas>
+
+        <button id="randomize" onclick="randomizeCube()">Randomize</button>
+        <button id="undo" onclick="undoTurn()">Undo</button>
+        <button id="redo" onclick="redoTurn()">Redo</button>
+        <button id="solve" onclick="solve()">Solve</button>
+        <button id="autoPlay" onclick="autoPlay()">Auto Play: OFF</button>
+        <button id="crossCFOP" onclick="crossCFOP()">Cross CFOP</button>
+        <button id="F2LCFOP" onclick="F2LCFOP()">F2L CFOP</button>
+
+        <textarea id="debugBox"></textarea>
+        <input type='text' id="cubeScreenshotInput" placeholder="Cube Screenshot Text">
+        <canvas id="screenshotCanvas" width="300" height="225"></canvas>
+
         <script src="script.js"></script>
     </body>
-    <body>
-        <button id = "randomize" onclick="randomizeCube()">Randomize</button>
-        <button id = "undo" onclick = "undoTurn()">Undo</button>
-        <button id = "redo" onclick = "redoTurn()">Redo</button>
-        <button id = "solve" onclick="solve()">Solve</button>
-        <button id = "autoPlay" onclick="autoPlay()">Auto Play: OFF</button>
-        <button id = "crossCFOP" onclick = "crossCFOP()">Cross CFOP</button>
-        <button id = "F2LCFOP" onclick = "F2LCFOP()">F2L CFOP</button>
-    </body>
+
+    <style>
+        #myCanvas { 
+            position: absolute;
+            top: 200px;
+        }
+
+        #debugBox {
+    position: fixed;
+    top: 10px;
+    right: 10px;        /* instead of left: calc(100% - 610px) */
+    width: 600px;
+    height: 300px;
+    overflow: auto;
+    border: 1px solid #000;
+    background-color: #f8f8f8;
+}
+
+#cubeScreenshotInput {
+    position: fixed;
+    top: 320px;
+    right: 410px;       /* 300px canvas + 10px gap + 100px breathing room — tweak as needed */
+    width: 200px;
+}
+
+#screenshotCanvas {
+    position: fixed;
+    top: 320px;
+    right: 10px;        /* sits flush to the right */
+    width: 300px;
+    height: 225px;
+    border: 1px solid #000;
+}
+
+        #changeMainCanvasInput {
+            position: fixed;
+            top: 150px;
+            left: 50px;
+            width: 200px;
+        }
+    </style>
 </html>

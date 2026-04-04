@@ -32,6 +32,18 @@ class Center{
     }
 }
 
+class Debug{
+    constructor(idSent){
+        this.id = idSent;
+    }
+
+    addText(text){
+        document.getElementById(this.id).value += text;
+        debugBox.scrollTop = debugBox.scrollHeight;  // scroll to bottom
+    }
+    
+}
+
 //corner pieces: 8
 var corner = [];
 var cornerPiece0 = new Corner("orange0c","blue0c","white0c");//whites
@@ -67,6 +79,7 @@ var edge9 = new Edge("orange9e","yellow9e");
 var edge10 = new Edge("greenae","yellowae");//a = 10
 var edge11 = new Edge("redbe","yellowbe");//b = 11
 
+
 edge.push(edge0);
 edge.push(edge1);
 edge.push(edge2);
@@ -82,12 +95,12 @@ edge.push(edge11);
 
 //centers: 6
 var center = []; //never going to move, constant
-var white = new Center("white0C");
-var blue = new Center("blue1C");
-var orange = new Center("orange2C");
-var green = new Center("green3C");
-var red = new Center("red4C");
-var yellow = new Center("yellow5C");
+var white = new Center("whiteCC");
+var blue = new Center("blueCC");
+var orange = new Center("orangeCC");
+var green = new Center("greenCC");
+var red = new Center("redCC");
+var yellow = new Center("yellowCC");
 
 center.push(white);
 center.push(blue);
@@ -192,232 +205,58 @@ function drawCube(){
         cc.fillRect(squareSide*arrCoord[0], squareSide*arrCoord[1], squareSide,squareSide);
         cc.strokeRect(squareSide*arrCoord[0], squareSide*arrCoord[1], squareSide,squareSide);
     }
-    /*
-    //FIRST LINE
-    cc.fillStyle = squareDict["3,0"];
-    cc.fillRect(squareSide*3,0,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,0,squareSide,squareSide);
+}
 
-    cc.fillStyle = edge[8].left;
-    cc.fillRect(squareSide*4,0,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,0,squareSide,squareSide);
+async function printCubeLayout(){
+    debugArea.addText("\n");
+    debugArea.addText("Cube Screenshot:\n");
+    for(let key in squareDict){
+        debugArea.addText(key+":"+squareDict[key] + " ");
+    }
+}
 
-    cc.fillStyle = corner[7].left;
-    cc.fillRect(squareSide*5,0,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,0,squareSide,squareSide);
+//input to change main canvas
+const mainCubeInput = document.getElementById("changeMainCanvasInput");
 
-    //SECOND LINE
-    cc.fillStyle = edge[4].right;
-    cc.fillRect(squareSide*3,squareSide*1,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*1,squareSide,squareSide);
+mainCubeInput.addEventListener("input", function(event) {
+    //console.log("User typed:", event.target.value);\
+    let content = event.target.value;
+    // Split by spaces first
+    content.split(" ").forEach(pair => {
+        // Split each "x,y:value" into key and value
+        const [key, value] = pair.split(":");
+        squareDict[key] = value;
+    });
+    drawCube();
+});
 
-    cc.fillStyle = center[1];
-    cc.fillRect(squareSide*4,squareSide*1,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*1,squareSide,squareSide);
+//screenShot Canvas
+const cubeScreenshotInput = document.getElementById("cubeScreenshotInput");
 
-    cc.fillStyle = edge[7].left;
-    cc.fillRect(squareSide*5,squareSide*1,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*1,squareSide,squareSide);
+cubeScreenshotInput.addEventListener("input", function(event) {
+    //console.log("User typed:", event.target.value);
+    drawScreenshot(event.target.value);
+});
 
-    //THIRD LINE
-    cc.fillStyle = corner[0].right;
-    cc.fillRect(squareSide*3,squareSide*2,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*2,squareSide,squareSide);
+var screenshotCanvas = document.getElementById("screenshotCanvas");
+var scc = screenshotCanvas.getContext("2d"); //scc = screenshot canvas content
+var sccSquareSide = 25;
 
-    cc.fillStyle = edge[0].left;
-    cc.fillRect(squareSide*4,squareSide*2,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*2,squareSide,squareSide);
+function drawScreenshot(content){//content is String "x,y:spot"
+    var map = {};
+    // Split by spaces first
+    content.split(" ").forEach(pair => {
+        // Split each "x,y:value" into key and value
+        const [key, value] = pair.split(":");
+        map[key] = value;
+    });
 
-    cc.fillStyle = corner[3].left;
-    cc.fillRect(squareSide*5,squareSide*2,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*2,squareSide,squareSide);
-
-    //FOURTH LINE
-    cc.fillStyle = corner[4].left;
-    cc.fillRect(squareSide*0,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*0,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = edge[4].left;
-    cc.fillRect(squareSide*1,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*1,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = corner[0].left;
-    cc.fillRect(squareSide*2,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*2,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = corner[0].top;
-    cc.fillRect(squareSide*3,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = edge[0].right;
-    cc.fillRect(squareSide*4,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = corner[3].top;
-    cc.fillRect(squareSide*5,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = corner[3].right;
-    cc.fillRect(squareSide*6,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*6,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = edge[7].right;
-    cc.fillRect(squareSide*7,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*7,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = corner[7].right;
-    cc.fillRect(squareSide*8,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*8,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = corner[7].top;
-    cc.fillRect(squareSide*9,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*9,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = edge[8].right;
-    cc.fillRect(squareSide*10,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*10,squareSide*3,squareSide,squareSide);
-
-    cc.fillStyle = corner[4].top;
-    cc.fillRect(squareSide*11,squareSide*3,squareSide,squareSide)
-    cc.strokeRect(squareSide*11,squareSide*3,squareSide,squareSide);
-
-    //FIFTH LINE
-    cc.fillStyle = edge[9].left;
-    cc.fillRect(squareSide*0,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*0,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = center[2];
-    cc.fillRect(squareSide*1,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*1,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = edge[1].left;
-    cc.fillRect(squareSide*2,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*2,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = edge[1].right;
-    cc.fillRect(squareSide*3,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = center[0];
-    cc.fillRect(squareSide*4,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = edge[3].right;
-    cc.fillRect(squareSide*5,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = edge[3].left;
-    cc.fillRect(squareSide*6,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*6,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = center[4];
-    cc.fillRect(squareSide*7,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*7,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = edge[11].left;
-    cc.fillRect(squareSide*8,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*8,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = edge[11].right;
-    cc.fillRect(squareSide*9,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*9,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = center[5];
-    cc.fillRect(squareSide*10,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*10,squareSide*4,squareSide,squareSide);
-
-    cc.fillStyle = edge[9].right;
-    cc.fillRect(squareSide*11,squareSide*4,squareSide,squareSide)
-    cc.strokeRect(squareSide*11,squareSide*4,squareSide,squareSide);
-
-    //SIXTH LINE
-    cc.fillStyle = corner[5].right;
-    cc.fillRect(squareSide*0,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*0,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = edge[5].right;
-    cc.fillRect(squareSide*1,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*1,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = corner[1].right;
-    cc.fillRect(squareSide*2,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*2,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = corner[1].top;
-    cc.fillRect(squareSide*3,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = edge[2].right;
-    cc.fillRect(squareSide*4,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = corner[2].top;
-    cc.fillRect(squareSide*5,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = corner[2].left;
-    cc.fillRect(squareSide*6,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*6,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = edge[6].left;
-    cc.fillRect(squareSide*7,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*7,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = corner[6].left;
-    cc.fillRect(squareSide*8,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*8,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = corner[6].top;
-    cc.fillRect(squareSide*9,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*9,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = edge[10].right;
-    cc.fillRect(squareSide*10,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*10,squareSide*5,squareSide,squareSide);
-
-    cc.fillStyle = corner[5].top;
-    cc.fillRect(squareSide*11,squareSide*5,squareSide,squareSide)
-    cc.strokeRect(squareSide*11,squareSide*5,squareSide,squareSide);
-
-    //SEVENTH LINE
-    cc.fillStyle = corner[1].left;
-    cc.fillRect(squareSide*3,squareSide*6,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*6,squareSide,squareSide);
-
-    cc.fillStyle = edge[2].left;
-    cc.fillRect(squareSide*4,squareSide*6,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*6,squareSide,squareSide);
-
-    cc.fillStyle = corner[2].right;
-    cc.fillRect(squareSide*5,squareSide*6,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*6,squareSide,squareSide);
-
-    //EIGHTH LINE
-    cc.fillStyle = edge[5].left;
-    cc.fillRect(squareSide*3,squareSide*7,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*7,squareSide,squareSide);
-
-    cc.fillStyle = center[3];
-    cc.fillRect(squareSide*4,squareSide*7,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*7,squareSide,squareSide);
-
-    cc.fillStyle = edge[6].right;
-    cc.fillRect(squareSide*5,squareSide*7,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*7,squareSide,squareSide);
-
-    //NINTH LINE
-    cc.fillStyle = corner[5].left;
-    cc.fillRect(squareSide*3,squareSide*8,squareSide,squareSide)
-    cc.strokeRect(squareSide*3,squareSide*8,squareSide,squareSide);
-
-    cc.fillStyle = edge[10].left;
-    cc.fillRect(squareSide*4,squareSide*8,squareSide,squareSide)
-    cc.strokeRect(squareSide*4,squareSide*8,squareSide,squareSide);
-
-    cc.fillStyle = corner[6].right;
-    cc.fillRect(squareSide*5,squareSide*8,squareSide,squareSide)
-    cc.strokeRect(squareSide*5,squareSide*8,squareSide,squareSide);
-    */
+    for(const key in map){
+        const [x, y] = key.split(",").map(Number);
+        scc.fillStyle = map[key].slice(0,-2);
+        scc.fillRect(x * sccSquareSide, y * sccSquareSide, sccSquareSide, sccSquareSide);
+        scc.strokeRect(sccSquareSide*x, sccSquareSide*y, sccSquareSide,sccSquareSide);
+    }
 }
 
 var face0 = ["3,3","4,3","5,3",
@@ -450,6 +289,9 @@ var ySquare = null;
 
 
 //Logic Start >:)
+
+var debugArea = new Debug("debugBox");
+
 var turnCounter = 0;
 canvas.addEventListener("mousedown", function(event){
     var faceClicked = null;
@@ -618,6 +460,7 @@ function Rotate1DSquareMatrixClockwise(matrix){
     swapSections(groups[0],groups[1],groups[2],groups[3]);
 
     drawCube();
+    debugArea.addText(groups[4] + " Clockwise\n");
     //return result;
 }
 
@@ -650,6 +493,7 @@ function Rotate1DSquareMatrixCounterClockwise(matrix){
     swapSections(groups[3],groups[2],groups[1],groups[0]);
 
     drawCube();
+    debugArea.addText(groups[4] + " CounterClockwise\n");
     //return result;
 }
 
@@ -709,10 +553,12 @@ var turnStackUndo = [];
 
 //Now randomize the cube through a button click
 function randomizeCube(){
-    let min = 21;
-    let max = 100;
-    let turnNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    //let min = 30;
+    //let max = 100;
+    //let turnNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    let turnNum = 30;
 
+    debugArea.addText("MIXING UP...\n");
     for(var i = 0; i < turnNum; i++){
         //get randomFace
         let min = 0;
@@ -727,7 +573,6 @@ function randomizeCube(){
 
         var groups = getGroups(faces[faceNum]);
 
-
         if(clockwiseTurn == 0){ //clockwise
             Rotate1DSquareMatrixClockwise(faces[faceNum]);
             //swapSections(groups[0],groups[1],groups[2],groups[3]);
@@ -740,11 +585,13 @@ function randomizeCube(){
         }
 
     }
+    debugArea.addText("CUBE RANDOMIZED.\n");
     turnStackUndo = [];
 }
 
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 
 async function solve(){
     while(turnStack.length != 0){
@@ -846,8 +693,9 @@ function updatePiecePos(name){
 //now attempting to add my own solving algorithm.
 async function crossCFOP(){
     //blue, orange, green, red
-    var updatePieces = [["blue0e","white0e"],["orange1e","white1e"],["green2e","white2e"],["red3e","white3e"]]
+    var updatePieces = [["blue0e","white0e"],["orange1e","white1e"],["green2e","white2e"],["red3e","white3e"]];
 
+    debugArea.addText("\nSOLVING CROSS...\n")
     for(let piece of updatePieces){
         //edge[0] = blue/white
         var be = piece[0];//blue edge
@@ -885,7 +733,7 @@ async function crossCFOP(){
             Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
             await delay(100);
 
-            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellow5C")));//rotate yellow face
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face
             await delay(100);
 
             //undo the moves
@@ -905,7 +753,7 @@ async function crossCFOP(){
             Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
             await delay(100);
 
-            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellow5C")));//rotate yellow face
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face
             await delay(100);
 
             //undo the moves
@@ -958,30 +806,571 @@ async function crossCFOP(){
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
             await delay(100);
         }
-    } 
-}
-
-function F2LCFOP(){
-
-    //Corner("orange0c","blue0c","white0c");
-    var oc = "orance0c";
-    var bc = "blue0c";
-    var wc = "white0c";
-
-    var ocPos = updatePiecePos(oc);
-    var bcPos = updatePiecePos(bc);
-    var wcPos = updatePiecePos(wc);
-
-    //Edge equivalent
-    //Edge("orange4e","blue4e");
-    var oe = "orange4e";
-    var be = "blue4e";
-
-    var oePos = updatePiecePos(oe);
-    var bePos = updatePiecePos(be);
-
-    if(getFaceString(oePos) != "yellow"){//not on top with the corner piece, so you have to pull it out
-        while(getFaceString()){}
     }
+    
+    debugArea.addText("\nCROSS FINISHED")
+    printCubeLayout();
 }
+
+
+async function F2LCFOP(){
+    var pairNumber = 1;
+    var updatePieces = [["orange0c","blue0c", "white0c", "orange4e", "blue4e"],["green1c","orange1c", "white1c","green5e","orange5e"],["red2c","green2c","white2c","red6e","green6e"],["blue3c","red3c","white3c","blue7e","red7e"]];
+    debugArea.addText("\n\nSOLVING F2L...\n")
+
+
+    var breakIteration = -1;
+    for(let piece of updatePieces){
+        breakIteration++;
+        if(breakIteration == 0){}
+        else if(breakIteration == 1){}
+        else if(breakIteration == 2){}
+        else if(breakIteration == 3){}
+
+
+        //Corner("orange0c","blue0c","white0c");
+        var oc = piece[0]
+        var bc = piece[1];
+        var wc = piece[2];
+
+        var ocPos = updatePiecePos(oc);
+        var bcPos = updatePiecePos(bc);
+        var wcPos = updatePiecePos(wc);
+
+        //Edge equivalent
+        //Edge("orange4e","blue4e");
+        var oe = piece[3];
+        var be = piece[4];
+
+        var oePos = updatePiecePos(oe);
+        var bePos = updatePiecePos(be);
+        for(let i = 0; i < 2; i++){//have to check twice because edge/corner can insert itself into the pocket
+            if(getFaceString(oePos) != "yellow" && getFaceString(bePos) != "yellow"){//not on top with the corner piece, so you have to pull it out
+                
+                Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
+                await delay(100);
+
+                bePos = updatePiecePos(be);
+                var threeTurns = false;
+                if(getFaceString(bePos) != "yellow"){
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
+                    await delay(100);
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
+                    await delay(100);
+                    threeTurns = true;
+                }
+
+                Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face with edge piece away
+                if(threeTurns){
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
+                    await delay(100);
+                    threeTurns = true;
+                }
+                else{
+                    Rotate1DSquareMatrixClockwise(getFaceArray(oePos));
+                    await delay(100);
+                }
+                oePos = updatePiecePos(oe);//now update
+                bePos = updatePiecePos(be);
+                ocPos = updatePiecePos(oc);
+                bcPos = updatePiecePos(bc);
+                wcPos = updatePiecePos(wc);
+
+            }
+            if(getFaceString(ocPos) != "yellow" && getFaceString(bcPos) != "yellow" && getFaceString(wcPos) != "yellow"){//corner is not on yellow top.
+                var turnThisPos = null
+                if(getFaceString(ocPos) != "white"){
+                    turnThisPos = ocPos;
+                } 
+                else{//use bcPos because ocPos is on white 
+                    turnThisPos = bcPos;
+                }
+                //rotate once...
+                Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
+                await delay(100);
+
+                //updation
+                ocPos = updatePiecePos(oc);
+                bcPos = updatePiecePos(bc);
+                wcPos = updatePiecePos(wc);
+
+                var twoTurns = false;
+                if(getFaceString(ocPos) != "yellow" && getFaceString(bcPos) != "yellow" && getFaceString(wcPos) != "yellow"){//still isnt there yet
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
+                    await delay(100);
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
+                    await delay(100);
+                    twoTurns = true;
+                }
+
+                Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face with edge piece away
+                await delay(100);
+                //Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//twice to be safe
+                //await delay(100);
+
+                if(twoTurns){
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
+                    await delay(100);
+                }
+                else{//undo the one turn
+                    Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
+                    await delay(100);
+                }
+
+                //updation
+                oePos = updatePiecePos(oe);//now update
+                bePos = updatePiecePos(be);
+                ocPos = updatePiecePos(oc);
+                bcPos = updatePiecePos(bc);
+                wcPos = updatePiecePos(wc);
+            }//going to have to recheck the edge didnt just insert himself off of yellow. so now i++;
+        }
+
+        //now if theyre next to each other seperate them.
+        //Ignore the edge color and corner color on yellow face.
+        //if the other edge colors face == either of the other 2 corner colors face...
+        //seperate them.
+
+        var importantEdge = null;
+        var importantEdgePos = null;
+        if(getFaceString(oePos) != "yellow"){
+            importantEdge = oe;
+            importantEdgePos = oePos;
+        }
+        else{
+            importantEdge = be;
+            importantEdgePos = bePos;
+        }
+
+        var importantCorner1 = null;
+        var importantCornerPos1 = null;
+        var importantCorner2 = null;
+        var importantCornerPos2 = null;
+
+        if(getFaceString(ocPos) == "yellow"){
+            importantCorner1 = bc;
+            importantCornerPos1 = bcPos;
+            importantCorner2 = wc;
+            importantCornerPos2 = wcPos;
+        }
+        else if(getFaceString(bcPos) == "yellow"){
+            importantCorner1 = oc;
+            importantCornerPos1 = ocPos;
+            importantCorner2 = wc;
+            importantCornerPos2 = wcPos;
+        }
+        else{//wc == yellow
+            importantCorner1 = oc;
+            importantCornerPos1 = ocPos;
+            importantCorner2 = bc;
+            importantCornerPos2 = bcPos;
+        }
+        var turnThis = null;
+        var turnThisPos = null;
+        var needsToSeeYellowPos = null;//this var when put into getFaceString() needs to be white to know you turned the correct amount of times.
+        var needsToSeeYellow = null
+
+        var nextToEachOther = false;
+        if(getFaceString(importantEdgePos) == getFaceString(importantCornerPos1)){//next to each other
+            //importantCorner1 is the same, so turn that face
+            nextToEachOther = true;
+            turnThis = importantCorner1;
+            turnThisPos = importantCornerPos1;
+            needsToSeeYellowPos = importantCornerPos2;
+            needsToSeeYellow = importantCorner2;
+        }
+        else if(getFaceString(importantEdgePos) == getFaceString(importantCornerPos2)){//next to each other
+            //importantCorner2 is the same, so turn that face
+            nextToEachOther = true;
+            turnThis = importantCorner2;
+            turnThisPos = importantCornerPos2;
+            needsToSeeYellowPos = importantCornerPos1;
+            needsToSeeYellow = importantCorner1;
+        }
+        if(nextToEachOther){
+            //turn it clockwise, if 
+
+                
+            //corner needs to be pulled down where it doesnt mess up any other edges
+            while(!((getFaceString(importantCornerPos1) == oc.slice(0,-2) || getFaceString(importantCornerPos1) == bc.slice(0,-2)) && (getFaceString(importantCornerPos2) == oc.slice(0,-2) || getFaceString(importantCornerPos2) == bc.slice(0,-2)))){
+                Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                await delay(100);
+
+                importantCornerPos1 = updatePiecePos(importantCorner1);
+                importantCornerPos2 = updatePiecePos(importantCorner2)
+            }
+
+            /*
+            //corner needs to be pulled down where it doesnt mess up any other edges
+            while(getFaceString(importantEdgePos) != importantEdge.slice(0,-2)){
+                Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                await delay(100);
+
+                importantEdgePos = updatePiecePos(importantEdge);
+            }*/
+            //now its over right spot
+            turnThisPos = updatePiecePos(turnThis);
+
+            Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
+            await delay(100);
+
+            needsToSeeYellowPos = updatePiecePos(needsToSeeYellow);
+
+            var threeTurn = false;
+            if(getFaceString(needsToSeeYellowPos) != "yellow"){//then spin it 2 more times.
+                Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
+                await delay(100);
+                Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
+                await delay(100);
+                threeTurn = true;
+            }
+
+            //rotate yellow twice:
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face with edge piece away
+            await delay(100);
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//twice to be safe
+            await delay(100);
+
+            if(threeTurn){//go one more to make full loop to return everything back to normal
+                Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
+                await delay(100);
+            }
+            else{//do one backwards to undo the one turn
+                Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
+                await delay(100);
+            }
+
+            //updation
+            ocPos = updatePiecePos(oc);
+            bcPos = updatePiecePos(bc);
+            wcPos = updatePiecePos(wc);
+
+            oePos = updatePiecePos(oe);
+            bePos = updatePiecePos(be);
+        }
+        
+        for(let i = 0; i < 2; i++){//twice because may put self in scenario where white is up after second if hits
+            //Scenarios:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            //white up-----------------
+            if(getFaceString(wcPos) == "yellow"){
+                var yellowUpEdge = null;
+                var yellowUpEdgePos = null;
+                if(getFaceString(oePos) == "yellow"){
+                    importantEdge = be;
+                    importantEdgePos = bePos;
+                    yellowUpEdge = oe;
+                    yellowUpEdgePos = oePos;
+                }
+                else{
+                    importantEdge = oe;
+                    importantEdgePos = oePos;
+                    yellowUpEdge = be;
+                    yellowUpEdgePos = bePos;
+                }
+
+                
+                while(getFaceString(importantEdgePos) != importantEdge.slice(0,-2)){//get over right spot
+                    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                    await delay(100);
+
+                    importantEdgePos = updatePiecePos(importantEdge);
+                }
+                //set over right spot now...
+                
+                //turn one direction...
+                Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
+                await delay(100);
+                yellowUpEdgePos = updatePiecePos(yellowUpEdge);
+
+                //update yeh
+                ocPos = updatePiecePos(oc);
+                bcPos = updatePiecePos(bc);
+                wcPos = updatePiecePos(wc);
+
+                oePos = updatePiecePos(oe);
+                bePos = updatePiecePos(be);
+
+                //check in right spot
+                threeTurn = false;
+                if(getFaceString(yellowUpEdgePos) ==  yellowUpEdge.slice(0,-2)){
+                    //then turn 2 more times
+                    threeTurn = true;
+                    Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
+                    await delay(100);
+                    Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
+                    await delay(100);
+                    yellowUpEdgePos = updatePiecePos(yellowUpEdge);
+                }
+
+                //check which corner peice needs to line up
+                if(importantEdge.slice(0,-2) == oc.slice(0,-2)){
+                    importantCorner1 = oc;
+                    importantCornerPos1 = ocPos;
+                }
+                else if(importantEdge.slice(0,-2) == bc.slice(0,-2)){
+                    importantCorner1 = bc;
+                    importantCornerPos1 = bcPos;
+                }
+                else{//importantEdge.slice(0,-2) == wc.slice(0,-2)
+                    importantCorner1 = wc;
+                    importantCornerPos1 = wcPos;
+                }
+
+                while(getFaceString(importantCornerPos1) != importantCorner1.slice(0,-2)){
+                    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                    await delay(100);
+
+                    importantCornerPos1 = updatePiecePos(importantCorner1);
+                }
+                //now on top of each other, just need to undo the turn
+
+                if(threeTurn){
+                    Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
+                    await delay(100);
+                }
+                else{
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(importantEdgePos));
+                    await delay(100);
+                }
+            }
+            else if (i == 0){//For same up and opposite up...
+                //what im thinking is pull down and put next to each other
+                //if they make a perfect pair then awesome.
+                //if they dont... then make it the whites up situtation by adding like 3 moves.
+
+                //Same Up/Opposite Up------------------------------------------
+
+                //first put them near each other.
+                if(getFaceString(ocPos) == "yellow"){
+                    importantCorner1 = bc;
+                    importantCornerPos1 = bcPos;
+                    importantCorner2 = oc;//on yellow face
+                    importantCornerPos2 = ocPos;//on yellow face
+                }
+                else if(getFaceString(bcPos) == "yellow"){//// wc cant be yellow face because we wouldnt have made it here.
+                    importantCorner1 = oc;
+                    importantCornerPos1 = ocPos;
+                    importantCorner2 = bc;//on yellow face
+                    importantCornerPos2 = bcPos;//on yellow face
+                }
+
+                while(getFaceString(wcPos) != importantCorner1.slice(0,-2)){
+                    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                    await delay(100);
+
+                    wcPos = updatePiecePos(wc);
+                }
+                //now were able to pull down to get edge and corner to each other.
+                Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
+                await delay(100);
+                //we try one direction and see if importantCorner is on face yellow, if so then turn 2 more times.
+                importantCornerPos1 = updatePiecePos(importantCorner1);
+                twoTurns = false;
+                if(getFaceString(importantCornerPos1) == "yellow"){
+                    //then turn 2 more times
+                    Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
+                    await delay(100);
+                    Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
+                    await delay(100);
+                    importantCornerPos1 = updatePiecePos(importantCorner1);
+                    twoTurns = true;
+                }
+                //update 
+                importantCornerPos1 = updatePiecePos(importantCorner1);
+                importantCornerPos2 = updatePiecePos(importantCorner2);//yellow face
+                
+                //updation
+                ocPos = updatePiecePos(oc);
+                bcPos = updatePiecePos(bc);
+                wcPos = updatePiecePos(wc);
+
+                oePos = updatePiecePos(oe);
+                bePos = updatePiecePos(be);
+
+                //now find where the edge. when the side of the edge that isnt on yellow face
+                //is on the face that importantCornerPos2 is then stop
+
+                var importantEdgeYellow = null;
+                var importantEdgeYellowPos = null;
+                if(getFaceString(oePos) == "yellow"){
+                    importantEdge = be;
+                    importantEdgePos = bePos;
+                    importantEdgeYellow = oe;
+                    importantEdgeYellowPos = oePos;
+                }
+                else{
+                    importantEdge = oe;
+                    importantEdgePos = oePos;
+                    importantEdgeYellow = be;
+                    importantEdgeYellowPos = bePos;
+                }
+
+                while(getFaceString(importantEdgePos) != getFaceString(importantCornerPos2) && getFaceString(importantEdgePos) != getFaceString(importantCornerPos1)){
+                    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                    await delay(100);
+
+                    importantEdgePos = updatePiecePos(importantEdge);
+                }
+                //edge in right spot so go back up
+                if(twoTurns){
+                    Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
+                    await delay(100);
+                }
+                else{
+                    Rotate1DSquareMatrixCounterClockwise(getFaceArray(wcPos));
+                    await delay(100);
+                }
+                //now they are back together.
+                //if they are not mismatch then continue. if they are then turn it into case 1.
+
+                //updation
+                ocPos = updatePiecePos(oc);
+                bcPos = updatePiecePos(bc);
+                wcPos = updatePiecePos(wc);
+
+                oePos = updatePiecePos(oe);
+                bePos = updatePiecePos(be);
+                //update 
+                importantCornerPos1 = updatePiecePos(importantCorner1);
+                importantCornerPos2 = updatePiecePos(importantCorner2);//yellow face
+                
+                if(importantEdgeYellow.slice(0,-2)!= importantCorner2.slice(0,-2)){//mismatch
+
+                //corner needs to be pulled down where it doesnt mess up any other edges
+                while(getFaceString(importantCornerPos1) != importantCorner1.slice(0,-2)){
+                    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                    await delay(100);
+
+                    importantCornerPos1 = updatePiecePos(importantCorner1);
+                }
+                    
+                    importantCornerPos1 = updatePiecePos(importantCorner1);
+                    importantCornerPos2 = updatePiecePos(importantCorner2);//yellow face
+
+
+                    Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
+                    await delay(100);
+
+                    wcPos = updatePiecePos(wc);
+
+                    twoTurns = false;
+                    if(getFaceString(wcPos) != "yellow"){//rotated the wrong way so rotate twice
+                        twoTurns = true;
+                        Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
+                        await delay(100);
+                        Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
+                        await delay(100);
+                    }
+
+                    //turn yellow away twice
+                    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                    await delay(100);
+                    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                    await delay(100);
+
+                    if(twoTurns){
+                        Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
+                        await delay(100);
+                    }
+                    else{
+                        Rotate1DSquareMatrixCounterClockwise(getFaceArray(importantCornerPos1));
+                        await delay(100);
+                    }
+
+                }
+            }
+
+            //updation
+            ocPos = updatePiecePos(oc);
+            bcPos = updatePiecePos(bc);
+            wcPos = updatePiecePos(wc);
+
+            oePos = updatePiecePos(oe);
+            bePos = updatePiecePos(be);
+        }
+
+
+
+        //PAIR MADE! : INSERT----------------------------------------------------
+        //updation
+        ocPos = updatePiecePos(oc);
+        bcPos = updatePiecePos(bc);
+        wcPos = updatePiecePos(wc);
+
+        oePos = updatePiecePos(oe);
+        bePos = updatePiecePos(be);
+    
+
+        var notYellow = null;
+        var notYellowPos = null;
+        if(getFaceString(oePos) == "yellow"){//important edge meaning this edge must match the edge that is getFaceString(notYellow).
+            importantEdge = oe;
+            importantEdgePos = oePos;
+            notYellow = be;
+            notYellowPos = bePos;
+        }
+        else{
+            importantEdge = be;
+            importantEdgePos = bePos;
+            notYellow = oe;
+            notYellowPos = oePos;
+        }
+
+        while(importantEdge.slice(0,-2) != getFaceString(notYellowPos)){
+            //rotate yellow
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+            await delay(100);
+
+            notYellowPos = updatePiecePos(notYellow);
+        }
+        //now over right hole...
+        //then rotate face of the color of notYellow
+        Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
+        await delay(100);
+
+        //we started with clockwise turn. so yellow must turn counter clockwise to insert
+        //however, after doing this, if not yellow is not in their corresponding face, then undo these moves.
+        //we must then start with a counter clockwise turn instead. and a yellow clockwise turn.
+
+        //do yellow turn
+        Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+        await delay(100);
+        notYellowPos = updatePiecePos(notYellow);
+
+        if(getFaceString(notYellowPos) != notYellow.slice(0,-2)){//we went the wrong way...
+            //undo
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+            await delay(100);
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
+            await delay(100);
+            notYellowPos = updatePiecePos(notYellow);
+
+            //then go the other way
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
+            await delay(100);
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+            await delay(100);
+            
+            //finish off with final turn back down
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
+            await delay(100);
+        }
+        else{//we went the right way
+            //finish off with final turn down
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
+            await delay(100);
+
+        }
+        debugArea.addText("\n");
+        debugArea.addText("PAIR " +pairNumber + " INSERTED - Corner: " + oc + ", " + bc + ", " + wc + " - Edge: " + oe + ", " + be)
+        await printCubeLayout();
+        debugArea.addText("\n");
+        pairNumber++;
+    }
+
+    debugArea.addText("\nF2L FINISHED")
+}
+
+
+
 
