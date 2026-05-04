@@ -6,6 +6,15 @@ var squareSide = 50
 //(ORANGE) (WHITE) (RED) (YELLOW)
 //         (GREEN)
 
+var delayTime = 25 //ms
+
+window.addEventListener('load', (event) => {
+    let screenshot = localStorage["screenshot"];
+    document.getElementById("cubeScreenshotInput").value = localStorage["screenshot"];
+    drawScreenshot(screenshot);
+});
+
+
 canvas.addEventListener("contextmenu", function(event) {
     event.preventDefault();
 });
@@ -225,7 +234,9 @@ mainCubeInput.addEventListener("input", function(event) {
     content.split(" ").forEach(pair => {
         // Split each "x,y:value" into key and value
         const [key, value] = pair.split(":");
-        squareDict[key] = value;
+        if(value != null){
+            squareDict[key] = value;
+        }
     });
     drawCube();
 });
@@ -235,6 +246,7 @@ const cubeScreenshotInput = document.getElementById("cubeScreenshotInput");
 
 cubeScreenshotInput.addEventListener("input", function(event) {
     //console.log("User typed:", event.target.value);
+    localStorage["screenshot"] = event.target.value; // only strings
     drawScreenshot(event.target.value);
 });
 
@@ -258,6 +270,11 @@ function drawScreenshot(content){//content is String "x,y:spot"
         scc.strokeRect(sccSquareSide*x, sccSquareSide*y, sccSquareSide,sccSquareSide);
     }
 }
+
+//turnNumberLabel
+var turnNumber = 0;
+var turnNumberLabel = document.getElementById("turnNumberLabel");
+
 
 var face0 = ["3,3","4,3","5,3",
              "3,4","4,4","5,4",
@@ -382,6 +399,72 @@ canvas.addEventListener("mousedown", function(event){
     }*/
 });
 
+function getPieceFromId(id){//give "white3e" and get edge3
+    if(id.at(-1) == "e"){//edge
+        if(id.at(-2) == "0"){
+            return edge0;
+        }
+        if(id.at(-2) == "1"){
+            return edge1;
+        }
+        if(id.at(-2) == "2"){
+            return edge2;
+        }
+        if(id.at(-2) == "3"){
+            return edge3;
+        }
+        if(id.at(-2) == "4"){
+            return edge4;
+        }
+        if(id.at(-2) == "5"){
+            return edge5;
+        }
+        if(id.at(-2) == "6"){
+            return edge6;
+        }
+        if(id.at(-2) == "7"){
+            return edge7;
+        }
+        if(id.at(-2) == "8"){
+            return edge8;
+        }
+        if(id.at(-2) == "9"){
+            return edge9;
+        }
+        if(id.at(-2) == "a"){
+            return edge10;
+        }
+        if(id.at(-2) == "b"){
+            return edge11;
+        }
+    }
+    else if(id.at(-1) == "c"){//corner
+        if(id.at(-2) == "0"){
+            return cornerPiece0;
+        }
+        if(id.at(-2) == "1"){
+            return cornerPiece1;
+        }
+        if(id.at(-2) == "2"){
+            return cornerPiece2;
+        }
+        if(id.at(-2) == "3"){
+            return cornerPiece3;
+        }
+        if(id.at(-2) == "4"){
+            return cornerPiece4;
+        }
+        if(id.at(-2) == "5"){
+            return cornerPiece5;
+        }
+        if(id.at(-2) == "6"){
+            return cornerPiece6;
+        }
+        if(id.at(-2) == "7"){
+            return cornerPiece7;
+        }
+    }
+}
 
 function getGroups(face){
     if(face == face0){//WHITE
@@ -459,6 +542,9 @@ function Rotate1DSquareMatrixClockwise(matrix){
     var groups = getGroups(matrix);//groups[4] = color that was clicked... Used to know what color was clicked when displaying previous turns
     swapSections(groups[0],groups[1],groups[2],groups[3]);
 
+    turnNumber++;
+    turnNumberLabel.innerText = turnNumber;
+
     drawCube();
     debugArea.addText(groups[4] + " Clockwise\n");
     //return result;
@@ -491,6 +577,9 @@ function Rotate1DSquareMatrixCounterClockwise(matrix){
 
     var groups = getGroups(matrix);//groups[4] = color that was clicked... Used to know what color was clicked when displaying previous turns
     swapSections(groups[3],groups[2],groups[1],groups[0]);
+
+    turnNumber++;
+    turnNumberLabel.innerText = turnNumber;
 
     drawCube();
     debugArea.addText(groups[4] + " CounterClockwise\n");
@@ -587,6 +676,11 @@ function randomizeCube(){
     }
     debugArea.addText("CUBE RANDOMIZED.\n");
     turnStackUndo = [];
+
+    //reset display to 0
+    turnNumber = 0;
+    turnNumberLabel.innerText = turnNumber;
+    
 }
 
 
@@ -605,7 +699,7 @@ async function solve(){
             Rotate1DSquareMatrixClockwise(movement[1]);
             //swapSections(groups[0],groups[1],groups[2],groups[3]);
         }
-        await delay(100);
+        await delay(delayTime);
     }
     turnStack = [];
     turnStackUndo = [];
@@ -712,78 +806,78 @@ async function crossCFOP(){
         if(whiteSpotsFace == "blue" && blueSpotsFace == "red" || whiteSpotsFace == "green" && blueSpotsFace == "orange" || whiteSpotsFace == "orange" && blueSpotsFace == "blue" || whiteSpotsFace == "red" && blueSpotsFace == "green"){
             Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
             wePos = updatePiecePos(we);
-            await delay(100);
+            await delay(delayTime);
 
             Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
             wePos = updatePiecePos(we);
-            await delay(100);
+            await delay(delayTime);
 
             //turn piece back
             //purposly didnt update blue piece pos to remember which piece to turn back
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
             bePos = updatePiecePos(be); //then we update it
-            await delay(100);
+            await delay(delayTime);
 
         }
         else if (blueSpotsFace == "yellow"){
             Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
             bePos = updatePiecePos(be);
-            await delay(100);
+            await delay(delayTime);
 
             Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
 
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face
-            await delay(100);
+            await delay(delayTime);
 
             //undo the moves
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(wePos));
             bePos = updatePiecePos(be);//then we update it
             wePos = updatePiecePos(we);
-            await delay(100);
+            await delay(delayTime);
 
         }
         else if(blueSpotsFace == "white"){
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(wePos));
             bePos = updatePiecePos(be);
-            await delay(100);
+            await delay(delayTime);
 
             Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
 
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face
-            await delay(100);
+            await delay(delayTime);
 
             //undo the moves
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
             Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
             bePos = updatePiecePos(be);//then we update it
             wePos = updatePiecePos(we);
-            await delay(100);
+            await delay(delayTime);
         }
         else if(whiteSpotsFace != "white" && whiteSpotsFace != "yellow"){//(whiteSpotsFace == "blue" && blueSpotFace == "orange" || whiteSpotsFace == "green" && blueSpotFace == "red" || whiteSpotsFace == "orange" && blueSpotsFace == "green" || whiteSpotsFace == "red" && blueSpotsFace == "blue") 
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
             wePos = updatePiecePos(we);
-            await delay(100);
+            await delay(delayTime);
 
             Rotate1DSquareMatrixClockwise(getFaceArray(wePos));
             wePos = updatePiecePos(we);
-            await delay(100);
+            await delay(delayTime);
 
             //turn piece back
             //purposly didnt update blue piece pos to remember which piece to turn back
             Rotate1DSquareMatrixClockwise(getFaceArray(bePos));
             bePos = updatePiecePos(be);//then we update it
-            await delay(100);
+            await delay(delayTime);
         }
         else if(whiteSpotsFace == "white" && blueSpotsFace != piece[0].slice(0,-2)){
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
             wePos = updatePiecePos(we);//then we update it
         }
         
@@ -798,13 +892,13 @@ async function crossCFOP(){
                 //update bePos
                 bePos = updatePiecePos(be);
 
-                await delay(100);
+                await delay(delayTime);
             }
             //white now on yellow face and blue is in blue. Turn twice
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(bePos));
-            await delay(100);
+            await delay(delayTime);
         }
     }
     
@@ -848,27 +942,27 @@ async function F2LCFOP(){
             if(getFaceString(oePos) != "yellow" && getFaceString(bePos) != "yellow"){//not on top with the corner piece, so you have to pull it out
                 
                 Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
-                await delay(100);
+                await delay(delayTime);
 
                 bePos = updatePiecePos(be);
                 var threeTurns = false;
                 if(getFaceString(bePos) != "yellow"){
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
-                    await delay(100);
+                    await delay(delayTime);
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
-                    await delay(100);
+                    await delay(delayTime);
                     threeTurns = true;
                 }
 
                 Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face with edge piece away
                 if(threeTurns){
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(oePos));
-                    await delay(100);
+                    await delay(delayTime);
                     threeTurns = true;
                 }
                 else{
                     Rotate1DSquareMatrixClockwise(getFaceArray(oePos));
-                    await delay(100);
+                    await delay(delayTime);
                 }
                 oePos = updatePiecePos(oe);//now update
                 bePos = updatePiecePos(be);
@@ -887,7 +981,7 @@ async function F2LCFOP(){
                 }
                 //rotate once...
                 Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
-                await delay(100);
+                await delay(delayTime);
 
                 //updation
                 ocPos = updatePiecePos(oc);
@@ -897,24 +991,24 @@ async function F2LCFOP(){
                 var twoTurns = false;
                 if(getFaceString(ocPos) != "yellow" && getFaceString(bcPos) != "yellow" && getFaceString(wcPos) != "yellow"){//still isnt there yet
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
-                    await delay(100);
+                    await delay(delayTime);
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
-                    await delay(100);
+                    await delay(delayTime);
                     twoTurns = true;
                 }
 
                 Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face with edge piece away
-                await delay(100);
+                await delay(delayTime);
                 //Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//twice to be safe
-                //await delay(100);
+                //await delay(delayTime);
 
                 if(twoTurns){
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
-                    await delay(100);
+                    await delay(delayTime);
                 }
                 else{//undo the one turn
                     Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
-                    await delay(100);
+                    await delay(delayTime);
                 }
 
                 //updation
@@ -994,7 +1088,7 @@ async function F2LCFOP(){
             //corner needs to be pulled down where it doesnt mess up any other edges
             while(!((getFaceString(importantCornerPos1) == oc.slice(0,-2) || getFaceString(importantCornerPos1) == bc.slice(0,-2)) && (getFaceString(importantCornerPos2) == oc.slice(0,-2) || getFaceString(importantCornerPos2) == bc.slice(0,-2)))){
                 Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                await delay(100);
+                await delay(delayTime);
 
                 importantCornerPos1 = updatePiecePos(importantCorner1);
                 importantCornerPos2 = updatePiecePos(importantCorner2)
@@ -1004,7 +1098,7 @@ async function F2LCFOP(){
             //corner needs to be pulled down where it doesnt mess up any other edges
             while(getFaceString(importantEdgePos) != importantEdge.slice(0,-2)){
                 Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                await delay(100);
+                await delay(delayTime);
 
                 importantEdgePos = updatePiecePos(importantEdge);
             }*/
@@ -1012,32 +1106,32 @@ async function F2LCFOP(){
             turnThisPos = updatePiecePos(turnThis);
 
             Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
-            await delay(100);
+            await delay(delayTime);
 
             needsToSeeYellowPos = updatePiecePos(needsToSeeYellow);
 
             var threeTurn = false;
             if(getFaceString(needsToSeeYellowPos) != "yellow"){//then spin it 2 more times.
                 Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
-                await delay(100);
+                await delay(delayTime);
                 Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
-                await delay(100);
+                await delay(delayTime);
                 threeTurn = true;
             }
 
             //rotate yellow twice:
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//rotate yellow face with edge piece away
-            await delay(100);
+            await delay(delayTime);
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));//twice to be safe
-            await delay(100);
+            await delay(delayTime);
 
             if(threeTurn){//go one more to make full loop to return everything back to normal
                 Rotate1DSquareMatrixClockwise(getFaceArray(turnThisPos));
-                await delay(100);
+                await delay(delayTime);
             }
             else{//do one backwards to undo the one turn
                 Rotate1DSquareMatrixCounterClockwise(getFaceArray(turnThisPos));
-                await delay(100);
+                await delay(delayTime);
             }
 
             //updation
@@ -1071,7 +1165,7 @@ async function F2LCFOP(){
                 
                 while(getFaceString(importantEdgePos) != importantEdge.slice(0,-2)){//get over right spot
                     Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                    await delay(100);
+                    await delay(delayTime);
 
                     importantEdgePos = updatePiecePos(importantEdge);
                 }
@@ -1079,7 +1173,7 @@ async function F2LCFOP(){
                 
                 //turn one direction...
                 Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
-                await delay(100);
+                await delay(delayTime);
                 yellowUpEdgePos = updatePiecePos(yellowUpEdge);
 
                 //update yeh
@@ -1096,9 +1190,9 @@ async function F2LCFOP(){
                     //then turn 2 more times
                     threeTurn = true;
                     Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
-                    await delay(100);
+                    await delay(delayTime);
                     Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
-                    await delay(100);
+                    await delay(delayTime);
                     yellowUpEdgePos = updatePiecePos(yellowUpEdge);
                 }
 
@@ -1118,7 +1212,7 @@ async function F2LCFOP(){
 
                 while(getFaceString(importantCornerPos1) != importantCorner1.slice(0,-2)){
                     Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                    await delay(100);
+                    await delay(delayTime);
 
                     importantCornerPos1 = updatePiecePos(importantCorner1);
                 }
@@ -1126,11 +1220,11 @@ async function F2LCFOP(){
 
                 if(threeTurn){
                     Rotate1DSquareMatrixClockwise(getFaceArray(importantEdgePos));
-                    await delay(100);
+                    await delay(delayTime);
                 }
                 else{
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(importantEdgePos));
-                    await delay(100);
+                    await delay(delayTime);
                 }
             }
             else if (i == 0){//For same up and opposite up...
@@ -1156,22 +1250,22 @@ async function F2LCFOP(){
 
                 while(getFaceString(wcPos) != importantCorner1.slice(0,-2)){
                     Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                    await delay(100);
+                    await delay(delayTime);
 
                     wcPos = updatePiecePos(wc);
                 }
                 //now were able to pull down to get edge and corner to each other.
                 Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
-                await delay(100);
+                await delay(delayTime);
                 //we try one direction and see if importantCorner is on face yellow, if so then turn 2 more times.
                 importantCornerPos1 = updatePiecePos(importantCorner1);
                 twoTurns = false;
                 if(getFaceString(importantCornerPos1) == "yellow"){
                     //then turn 2 more times
                     Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
-                    await delay(100);
+                    await delay(delayTime);
                     Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
-                    await delay(100);
+                    await delay(delayTime);
                     importantCornerPos1 = updatePiecePos(importantCorner1);
                     twoTurns = true;
                 }
@@ -1207,18 +1301,18 @@ async function F2LCFOP(){
 
                 while(getFaceString(importantEdgePos) != getFaceString(importantCornerPos2) && getFaceString(importantEdgePos) != getFaceString(importantCornerPos1)){
                     Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                    await delay(100);
+                    await delay(delayTime);
 
                     importantEdgePos = updatePiecePos(importantEdge);
                 }
                 //edge in right spot so go back up
                 if(twoTurns){
                     Rotate1DSquareMatrixClockwise(getFaceArray(wcPos));
-                    await delay(100);
+                    await delay(delayTime);
                 }
                 else{
                     Rotate1DSquareMatrixCounterClockwise(getFaceArray(wcPos));
-                    await delay(100);
+                    await delay(delayTime);
                 }
                 //now they are back together.
                 //if they are not mismatch then continue. if they are then turn it into case 1.
@@ -1239,7 +1333,7 @@ async function F2LCFOP(){
                 //corner needs to be pulled down where it doesnt mess up any other edges
                 while(getFaceString(importantCornerPos1) != importantCorner1.slice(0,-2)){
                     Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                    await delay(100);
+                    await delay(delayTime);
 
                     importantCornerPos1 = updatePiecePos(importantCorner1);
                 }
@@ -1249,7 +1343,7 @@ async function F2LCFOP(){
 
 
                     Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
-                    await delay(100);
+                    await delay(delayTime);
 
                     wcPos = updatePiecePos(wc);
 
@@ -1257,24 +1351,24 @@ async function F2LCFOP(){
                     if(getFaceString(wcPos) != "yellow"){//rotated the wrong way so rotate twice
                         twoTurns = true;
                         Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
-                        await delay(100);
+                        await delay(delayTime);
                         Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
-                        await delay(100);
+                        await delay(delayTime);
                     }
 
                     //turn yellow away twice
                     Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                    await delay(100);
+                    await delay(delayTime);
                     Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-                    await delay(100);
+                    await delay(delayTime);
 
                     if(twoTurns){
                         Rotate1DSquareMatrixClockwise(getFaceArray(importantCornerPos1));
-                        await delay(100);
+                        await delay(delayTime);
                     }
                     else{
                         Rotate1DSquareMatrixCounterClockwise(getFaceArray(importantCornerPos1));
-                        await delay(100);
+                        await delay(delayTime);
                     }
 
                 }
@@ -1319,14 +1413,14 @@ async function F2LCFOP(){
         while(importantEdge.slice(0,-2) != getFaceString(notYellowPos)){
             //rotate yellow
             Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-            await delay(100);
+            await delay(delayTime);
 
             notYellowPos = updatePiecePos(notYellow);
         }
         //now over right hole...
         //then rotate face of the color of notYellow
         Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
-        await delay(100);
+        await delay(delayTime);
 
         //we started with clockwise turn. so yellow must turn counter clockwise to insert
         //however, after doing this, if not yellow is not in their corresponding face, then undo these moves.
@@ -1334,31 +1428,31 @@ async function F2LCFOP(){
 
         //do yellow turn
         Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
-        await delay(100);
+        await delay(delayTime);
         notYellowPos = updatePiecePos(notYellow);
 
         if(getFaceString(notYellowPos) != notYellow.slice(0,-2)){//we went the wrong way...
             //undo
             Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-            await delay(100);
+            await delay(delayTime);
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
-            await delay(100);
+            await delay(delayTime);
             notYellowPos = updatePiecePos(notYellow);
 
             //then go the other way
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
-            await delay(100);
+            await delay(delayTime);
             Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
-            await delay(100);
+            await delay(delayTime);
             
             //finish off with final turn back down
             Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
-            await delay(100);
+            await delay(delayTime);
         }
         else{//we went the right way
             //finish off with final turn down
             Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos(notYellow.slice(0,-2) + "CC")));
-            await delay(100);
+            await delay(delayTime);
 
         }
         debugArea.addText("\n");
@@ -1368,9 +1462,432 @@ async function F2LCFOP(){
         pairNumber++;
     }
 
-    debugArea.addText("\nF2L FINISHED")
+    debugArea.addText("\nF2L FINISHED\n")
 }
 
 
+async function yellowEdgeOrientateL(edge0,edge1){//edge0: wrong edge facing you, edge1: wrong edge on right side
+    var ye0 = edge0.right;
+    var ye1 = edge1.right;
+    var ye0Pos = updatePiecePos(ye0);
+    var ye1Pos = updatePiecePos(ye1);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(ye0Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(ye1Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(ye1Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(ye0Pos));
+    await delay(delayTime);
+}
+
+async function yellowEdgeOrientateStraight(edge0,edge1){//edge0: wrong edge facing you, edge1: correct edge on right side
+    var ye0 = edge0.right;
+    var ye1 = edge1.left;
+    var ye0Pos = updatePiecePos(ye0);
+    var ye1Pos = updatePiecePos(ye1);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(ye0Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(ye1Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(ye1Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(ye0Pos));
+    await delay(delayTime);
+
+}
+
+//DRULDRU,
+async function yellowCornerRotation(corner0,corner1){
+    var notYellowCorner0 = null
+    var notYellowCorner0Pos = null;
+    if(getFaceString(updatePiecePos(corner0.right)) != "yellow"){//then save this side
+        notYellowCorner0 = corner0.right;
+    }
+    else{
+        notYellowCorner0 = corner0.left;
+    }
+    notYellowCorner0Pos = updatePiecePos(notYellowCorner0);
 
 
+    //save coord of where notYellowCord is because need to put yellow piece there later
+    var oldNotYellowCorner0Pos = notYellowCorner0Pos;
+
+
+    //DRULDRU
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(notYellowCorner0Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("whiteCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(notYellowCorner0Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("whiteCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(notYellowCorner0Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("whiteCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(notYellowCorner0Pos));
+    await delay(delayTime);
+
+
+    var notYellowCorner1 = null;
+    var notYellowCorner1Pos = null;
+    var yellowCorner1 = corner1.top;
+    var yellowCorner1Pos = updatePiecePos(yellowCorner1);
+
+    /*
+    if(getFaceString(yellowCorner1Pos) != "yellow"){//then save this side
+        notYellowCorner1 = corner1.right;
+    }
+    else{
+        notYellowCorner1 = corner1.left;
+    }
+    notYellowCorner1Pos = updatePiecePos(notYellowCorner1);*/
+    //notYellowCorner1Pos dodesnt even need to be used
+
+    while(yellowCorner1Pos != oldNotYellowCorner0Pos){
+        //keep rotating yellow till its there
+        Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+        await delay(delayTime);
+
+        yellowCorner1Pos = updatePiecePos(yellowCorner1);
+    }
+    yellowCorner1Pos = updatePiecePos(yellowCorner1);
+
+    //Then DLURDLU
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(yellowCorner1Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("whiteCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(yellowCorner1Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("whiteCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(yellowCorner1Pos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("whiteCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(yellowCorner1Pos));
+    await delay(delayTime);
+
+}
+
+//three on left side... start with the middle left piece
+//DLULDLLU
+async function threePieceCornerRotationLeft(cornerPos){
+    //send them in the order where corner0 is the corner we need to do the operation on.
+
+    //var yellowCorner = corner0.top;
+    //var yellowCornerPos = updatePiecePos(yellowCorner);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+
+}
+
+
+//URDRURRD
+//send in the yellow middle corner found, thats the face moving
+async function threePieceCornerRotationRight(cornerPos){
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    await delay(delayTime);
+
+    Rotate1DSquareMatrixCounterClockwise(getFaceArray(cornerPos));
+    await delay(delayTime);
+}
+
+async function OLLCFOP(){
+    debugArea.addText("\nSTARTING OLL");
+
+    //first is getting edges facing up
+    //3 scenarios: L, Straight, None
+
+    var yellowEdge0 = edge8;//blue //.right is yellow side
+    var yellowEdge1 = edge9;//orange
+    var yellowEdge2 = edge10;//green
+    var yellowEdge3 = edge11;//red
+
+    var yellowEdges = [yellowEdge0,yellowEdge1,yellowEdge2,yellowEdge3];
+    var edgesFacingRightWay = [];
+    var edgesFacingWrongWay = [];
+
+    for(let edge of yellowEdges){
+        if(getFaceString(updatePiecePos(edge.right)) == "yellow"){
+            edgesFacingRightWay.push(edge);
+        }
+        else{
+            edgesFacingWrongWay.push(edge);
+        }
+    }
+
+    if(edgesFacingRightWay.length == 0){
+
+        //let oneEdge = yellowEdge0;
+        //let ye0
+        let wrongFacingForward = squareDict["4,0"];
+        let edgeFacingForward = getPieceFromId(wrongFacingForward);
+        let wrongFacingRight = squareDict["8,4"];
+        let edgeFacingRight = getPieceFromId(wrongFacingRight);
+
+        await yellowEdgeOrientateL(edgeFacingForward,edgeFacingRight);
+        //recalculate:
+        edgesFacingRightWay.length = 0;
+        edgesFacingWrongWay.length = 0;
+        for(let edge of yellowEdges){
+            if(getFaceString(updatePiecePos(edge.right)) == "yellow"){
+                edgesFacingRightWay.push(edge);
+            }
+            else{
+                edgesFacingWrongWay.push(edge);
+            }
+        }
+    }
+
+    if(edgesFacingRightWay.length != 4){
+        var ye0 = edgesFacingRightWay[0].right;
+        var ye1 = edgesFacingRightWay[1].right;
+        var ye0Pos = updatePiecePos(ye0);
+        var ye1Pos = updatePiecePos(ye1);
+
+        //L: x and y position only differ by 1
+        let arr0 = ye0Pos.split(',').map(Number);
+        let arr1 = ye1Pos.split(',').map(Number);
+
+        let dx = Math.abs(arr0[0] - arr1[0]);
+        let dy = Math.abs(arr0[1] - arr1[1]);
+        if(dx == 1 && dy == 1){//L orientation
+            //turn yellow top till these pieces are on left and top
+            while(!((ye0Pos == "9,4" || ye0Pos == "10,3") && (ye1Pos == "9,4" || ye1Pos == "10,3"))){
+                Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                await delay(delayTime);
+
+                ye0Pos = updatePiecePos(ye0);
+                ye1Pos = updatePiecePos(ye1);
+            }
+            //orientated correctly
+
+            let wrongEdge0 = edgesFacingWrongWay[0].left;
+            let wrongEdge1 = edgesFacingWrongWay[1].left;
+            let wrongEdge0Pos = updatePiecePos(wrongEdge0);
+            let wrongEdge1Pos = updatePiecePos(wrongEdge1);
+
+            let wrongArr0 = wrongEdge0Pos.split(',').map(Number);
+            let wrongArr1 = wrongEdge1Pos.split(',').map(Number);
+
+            if(wrongArr0[0] > wrongArr1[0]){//if x of 0 is greater, then wrongEdge0 is on right side
+                await yellowEdgeOrientateL(edgesFacingWrongWay[1], edgesFacingWrongWay[0]);
+            }
+            else{
+                await yellowEdgeOrientateL(edgesFacingWrongWay[0], edgesFacingWrongWay[1]);
+            }
+
+        }
+        else{//were dealing with straight
+            //turn yellow till its going left to right
+            while(!((ye0Pos == "9,4" || ye0Pos == "11,4") && (ye1Pos == "9,4" || ye1Pos == "11,4"))){
+                Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+                await delay(delayTime);
+
+                ye0Pos = updatePiecePos(ye0);
+                ye1Pos = updatePiecePos(ye1);
+            }
+            //orientated correctly
+
+            arr0 = ye0Pos.split(',').map(Number);
+            arr1 = ye1Pos.split(',').map(Number);
+
+
+            let sendRightSideEdge = null
+            if(arr0[0] < arr1[0]){//arr1's x is greater so its on the right side and needs to be sent into function
+                sendRightSideEdge = edgesFacingRightWay[1];
+            }
+            else{
+                sendRightSideEdge = edgesFacingRightWay[0];
+            }
+
+            //get wrong side facing you:
+            let wrongEdge0 = edgesFacingWrongWay[0].left;
+            let wrongEdge1 = edgesFacingWrongWay[1].left;
+            let wrongEdge0Pos = updatePiecePos(wrongEdge0);
+            let wrongEdge1Pos = updatePiecePos(wrongEdge1);
+
+            let wrongArr0 = wrongEdge0Pos.split(',').map(Number);
+            let wrongArr1 = wrongEdge1Pos.split(',').map(Number);
+
+            let sendBottomSideEdge = null;
+            if(wrongArr0[1] < wrongArr1[1]){//arr0 is higher so send in the other one
+                sendBottomSideEdge = edgesFacingWrongWay[1];
+            }
+            else{
+                sendBottomSideEdge = edgesFacingWrongWay[0];
+            }
+
+            await yellowEdgeOrientateStraight(sendBottomSideEdge, sendRightSideEdge);
+
+        }
+
+    }
+
+    debugArea.addText("\nYELLOW EDGES FINISHED");
+    await printCubeLayout();
+
+
+    //then corners facing up
+    var yellowCorner1 = cornerPiece4; //top is yellow
+    var yellowCorner2 = cornerPiece5;
+    var yellowCorner3 = cornerPiece6;
+    var yellowCorner4 = cornerPiece7;
+    var yellowCorners = [cornerPiece4,cornerPiece5,cornerPiece6,cornerPiece7];
+
+    var notFacingRightWay = []
+    var rightSide = [];//facing wrong way but yellow is facing you on the right side
+    var leftSide = [];
+    
+    for(let corner of yellowCorners){
+        if(getFaceString(updatePiecePos(corner.top)) != "yellow"){
+            notFacingRightWay.push(corner);
+            var yellowLocation = updatePiecePos(corner.top);
+            if(yellowLocation == "5,0" || yellowLocation == "0,3" ||yellowLocation == "3,8" ||yellowLocation == "8,5"){
+                rightSide.push(corner);
+            }
+            else{
+                leftSide.push(corner);
+            }
+        }
+    }
+    if(rightSide.length == leftSide.length){
+        debugArea.addText("\n\nEVEN CORNERS\n");
+        for(let i = 0 ; i < rightSide.length; i++){
+            await yellowCornerRotation(rightSide[i],leftSide[i]);
+        }
+    }
+    else if(leftSide.length > rightSide.length){//DLULDLLU, Just need to know where to start, probably make an new function...
+        debugArea.addText("\n\nLEFT CORNERS\n");
+        arrOrder = [];
+        //3,0  8,3  5,8  0,5
+        var leftCorners = ["3,0","8,3","5,8","0,5"];
+
+        let startAdding = false;
+        while(arrOrder.length != 4){
+            for(let corner of leftCorners){
+                if(!arrOrder.includes(corner)){
+                    if(squareDict[corner].slice(0,-2) != "yellow"){
+                        startAdding = true;
+                        arrOrder.push(corner);
+                    }
+                    else if(startAdding){
+                        arrOrder.push(corner);
+                    }
+                }
+            }
+        }
+
+        //arrOrder: {Right, Wrong, Wrong, Wrong} where ther 2nd wrong is the one i need to start the operation on
+
+        threePieceCornerRotationLeft(arrOrder[2]);
+    }
+    else if(rightSide.length > leftSide.length){//URDRURRD
+        debugArea.addText("\n\nRIGHT CORNERS\n");
+
+        arrOrder = [];
+        //3,0  8,3  5,8  0,5
+        var rightCorners = ["5,0","8,5","3,8","0,3"];
+
+        let startAdding = false;
+        while(arrOrder.length != 4){
+            for(let corner of rightCorners){
+                if(!arrOrder.includes(corner)){
+                    if(squareDict[corner].slice(0,-2) != "yellow"){
+                        startAdding = true;
+                        arrOrder.push(corner);
+                    }
+                    else if(startAdding){
+                        arrOrder.push(corner);
+                    }
+                }
+            }
+        }
+
+        //arrOrder: {Right, Wrong, Wrong, Wrong} where ther 2nd wrong is the one i need to start the operation on
+
+        threePieceCornerRotationRight(arrOrder[2]);
+    }
+    debugArea.addText("\nCORNERS/EDGES ORIENTED")
+    printCubeLayout();
+
+}

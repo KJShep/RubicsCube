@@ -11,10 +11,13 @@
         <button id="autoPlay" onclick="autoPlay()">Auto Play: OFF</button>
         <button id="crossCFOP" onclick="crossCFOP()">Cross CFOP</button>
         <button id="F2LCFOP" onclick="F2LCFOP()">F2L CFOP</button>
+        <button id="OLLCFOP" onclick="OLLCFOP()">OLL CFOP</button>
+        <button id="PLLCFOP" onclick="PLLCFOP()">PLL CFOP</button>
 
         <textarea id="debugBox"></textarea>
         <input type='text' id="cubeScreenshotInput" placeholder="Cube Screenshot Text">
         <canvas id="screenshotCanvas" width="300" height="225"></canvas>
+        <label id="turnNumberLabel">0</label>
 
         <script src="script.js"></script>
     </body>
@@ -27,7 +30,7 @@
 
         #debugBox {
     position: fixed;
-    top: 10px;
+    top: 40px;
     right: 10px;        /* instead of left: calc(100% - 610px) */
     width: 600px;
     height: 300px;
@@ -38,14 +41,14 @@
 
 #cubeScreenshotInput {
     position: fixed;
-    top: 320px;
+    top: 350px;
     right: 410px;       /* 300px canvas + 10px gap + 100px breathing room — tweak as needed */
     width: 200px;
 }
 
 #screenshotCanvas {
     position: fixed;
-    top: 320px;
+    top: 350px;
     right: 10px;        /* sits flush to the right */
     width: 300px;
     height: 225px;
