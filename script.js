@@ -50,6 +50,12 @@ class Debug{
         document.getElementById(this.id).value += text;
         debugBox.scrollTop = debugBox.scrollHeight;  // scroll to bottom
     }
+
+    clear(){
+        document.getElementById(this.id).value = "";
+        debugBox.scrollTop = debugBox.scrollHeight;
+    }
+
     
 }
 
@@ -198,6 +204,7 @@ var squareDict = {
     "5,8" :corner[6].right
     
 }
+var finishedCube = JSON.parse(JSON.stringify(squareDict));
 
 drawCube();
 function drawCube(){
@@ -641,11 +648,13 @@ var turnStack = [];
 var turnStackUndo = [];
 
 //Now randomize the cube through a button click
-function randomizeCube(){
+async function randomizeCube(){
     //let min = 30;
     //let max = 100;
     //let turnNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    let turnNum = 30;
+    let turnNum = 21;
+
+    debugArea.clear();
 
     debugArea.addText("MIXING UP...\n");
     for(var i = 0; i < turnNum; i++){
@@ -675,6 +684,7 @@ function randomizeCube(){
 
     }
     debugArea.addText("CUBE RANDOMIZED.\n");
+    await printCubeLayout();
     turnStackUndo = [];
 
     //reset display to 0
@@ -751,7 +761,13 @@ async function autoPlay(){
     }
     while(isAutoPlay){
         randomizeCube();
-        await solve();
+        await crossCFOP();
+        await F2LCFOP();
+        await OLLCFOP();
+        await PLLCFOP();
+        if(!isSolved()){
+            autoPlay();
+        }
         await delay(1000);
     }
 }
@@ -1859,7 +1875,7 @@ async function OLLCFOP(){
 
         //arrOrder: {Right, Wrong, Wrong, Wrong} where ther 2nd wrong is the one i need to start the operation on
 
-        threePieceCornerRotationLeft(arrOrder[2]);
+        await threePieceCornerRotationLeft(arrOrder[2]);
     }
     else if(rightSide.length > leftSide.length){//URDRURRD
         debugArea.addText("\n\nRIGHT CORNERS\n");
@@ -1885,9 +1901,281 @@ async function OLLCFOP(){
 
         //arrOrder: {Right, Wrong, Wrong, Wrong} where ther 2nd wrong is the one i need to start the operation on
 
-        threePieceCornerRotationRight(arrOrder[2]);
+        await threePieceCornerRotationRight(arrOrder[2]);
     }
     debugArea.addText("\nCORNERS/EDGES ORIENTED")
-    printCubeLayout();
+    await printCubeLayout();
+    debugArea.addText("\n\n")
 
+}
+
+function getData(){
+    var data = "";
+    //var locations = ["3,0","4,0","5,0","8,3","8,4","8,5","5,8","4,8","3,8","0,5","0,4","0,3"];
+    var locations = ["3,8","4,8","5,8","8,5","8,4","8,3","5,0","4,0","3,0","0,3","0,4","0,5"];
+    for(let loc of locations){
+        data+=(squareDict[loc])[0];
+    }
+
+    //debugArea.addText(data);
+    return data;
+}
+
+function makeSequence(data){//data = "BBGROGBO..." turned into "WWXYZXWZ...""
+    //WXYZ
+    var ordering = [];
+    for(var color of data){
+        if(!ordering.includes(color)){
+            ordering.push(color);
+        }
+        if(ordering.length == 4){
+            break;
+        }
+    }
+
+    //now ordering has the 4 colors in the order they appear in sequence
+
+    var ans = data;
+    ans = ans.replaceAll(ordering[0], "W");
+    ans = ans.replaceAll(ordering[1], "X");
+    ans = ans.replaceAll(ordering[2], "Y");
+    ans = ans.replaceAll(ordering[3], "Z");
+
+    //debugArea.addText(ans);
+    return ans;
+}
+
+function matchSequence(sequence){
+    //Aa
+    if(sequence == "WXYZWWYYZXZX"){
+        //debugArea.addText("Aa");
+        return "Aa-L L B B L' F' L B B L' F L'";
+    }
+    //Ab
+    if(sequence == "WXXYYWXZYZWZ"){
+        //debugArea.addText("Ab");
+        return "Ab-L L F F L B L' F F L B' L";
+    }
+    //F
+    if(sequence == "WXYXYWYWXZZZ"){
+        //debugArea.addText("F");
+        return "F-R' U' F' R U R' U' R' F R R U' R' U' R U R' U R";
+    }
+    //Ga
+    if(sequence == "WXYXZWYYXZWZ"){
+        //debugArea.addText("Ga");
+        //return "Ga-U U R R U R' U R' U' R U' R R U' D R' U R D'";
+        return "Ga-R R U R' U R' U' R U' R R U' D R' U R D'";
+    }
+    //Gb
+    if(sequence == "WXYZZWYWZXYX"){
+        //debugArea.addText("Gb");
+        return "Gb-R' U' R U D' R R U R' U R U' R U' R R D";
+    }
+    //Gc
+    if(sequence == "WXXYZWXWYZYZ"){
+        //debugArea.addText("Gc");
+        return "Gc-R R U' R U' R U R' U R R U D' R U' R' D";
+    }
+    //Gd
+    if(sequence == "WXYXWWYZXZYZ"){
+        //debugArea.addText("Gd");
+        return "Gd-R U R' U' D R R U' R U' R' U R' U R R D'";
+    }
+    //Ja
+    if(sequence == "WXXYWWXYYZZZ"){
+        //debugArea.addText("Ja");
+        return "Ja-R R D R D' R F F L' U L F F";
+        return "Ja-x R R F R F' R U U r' U r U U"
+        //return "Ja-R R D R D' R F F L U L' F F";
+        //return "Ja-R R D R D' R F F U F F";
+    }
+    //Jb
+    if(sequence == "WWXYYWXXYZZZ"){
+        //debugArea.addText("Jb");
+        return "Jb-R U R' F' R U R' U' R' F R R U' R'";
+    }
+    //Ra
+    if(sequence == "WXYZYWYZZXWX"){
+        //debugArea.addText("Ra");
+        return "Ra-R U' R' U' R U R D R' U' R D' R' U U R'";
+    }
+    //Rb
+    if(sequence == "WWXYXWXZYZYZ"){
+        //debugArea.addText("Rb");
+        return "Rb-R R F R U R U' R' F' R U U R' U U R";
+    }
+    //T
+    if(sequence == "WWXYZWXYYZXZ"){
+        //debugArea.addText("T");
+        return "T-R U R' U' R' F R R U' R' U' R U R' F'";
+    }
+    //E
+    if(sequence == "WXYZYXYZWXWZ"){
+        //debugArea.addText("E");
+        return "E-L' B L F' L' B' L F L' B' L F' L' B L F";
+    }
+    //Na
+    if(sequence == "WWXYYZXXWZZY"){
+        //debugArea.addText("Na");
+        return "Na-R U R' U R U R' F' R U R' U' R' F R R U' R' U U R U' R'";
+    }
+    //Nb
+    if(sequence == "WXXYZZXWWZYY"){
+        //debugArea.addText("Nb");
+        return "Nb-R' U R U' R' F' U' F R U R' F R' F' R U' R";
+    }
+    //V
+    if(sequence == "WXYXYZYWWZZX"){
+        //debugArea.addText("V");
+        return "V-R' U R' U' B' R' B B U' B' U B' R B R";
+    }
+    //Y
+    if(sequence == "WXYZZXYWWXYZ"){
+        //debugArea.addText("Y");
+        return "Y-F R U' R' U' R U R' F' R U R' U' R' F R F'";
+    }
+    //H
+    if(sequence == "WXWYZYXWXZYZ"){
+        //debugArea.addText("H");
+        return "H-M M D M M U U M M D M M";
+    }
+    //Ua
+    if(sequence == "WWWXYXZXZYZY"){
+        //debugArea.addText("UA");
+        return "Ua-M M D M F F M' D M M";
+    }
+
+    //Ub
+    if(sequence == "WWWXYXYZYZXZ"){
+        //debugArea.addText("Ub");
+        return "Ub-M M D' M F F M' D' M M";
+    }
+    //Z
+    if(sequence == "WXWXWXYZYZYZ"){
+        //debugArea.addText("Z");
+        return "Z-M' F M M B M M F M' D D M M";
+    }
+
+    return "";
+}
+
+async function doInstruction(PLLSequence){
+    let sequence = PLLSequence.split("-")[0];
+    let instr = PLLSequence.split("-")[1];
+
+    let instructions = instr.split(" ")
+    for(let currInstr of instructions){
+        if(currInstr == "L"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("orangeCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "L'"){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("orangeCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "R"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("redCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "R'"){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("redCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "F"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("blueCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "F'"){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("blueCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "U"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "U'"){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "D"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("whiteCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "D'"){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("whiteCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "B"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("greenCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "B'"){
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("greenCC")));
+            await delay(delayTime);
+        }
+        else if(currInstr == "M"){//top goes down
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("orangeCC")));
+            await delay(delayTime);
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("redCC")));
+            await delay(delayTime);
+
+        }
+        else if(currInstr == "M'"){
+            Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("orangeCC")));
+            await delay(delayTime);
+            Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("redCC")));
+            await delay(delayTime);
+        }
+        else{
+            throw error();
+        }
+    }
+    
+
+}
+
+async function PLLCFOP(){
+
+    var foundSequence = false;
+    var PLLSequence = ""
+    var count = 0;
+    while(PLLSequence == ""){
+        count++;
+        if(count == 5){//already solved just maybe 1-2 turns of yellow away
+            break;
+        }
+        Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+        await delay(delayTime);
+
+        var data = getData();
+        var sequence = makeSequence(data);
+
+        PLLSequence = matchSequence(sequence);
+
+    }
+    
+
+    //Rotate1DSquareMatrixCounterClockwise(getFaceArray(updatePiecePos("yellowCC")));
+    //await delay(delayTime);
+
+    if(count != 5){
+        debugArea.addText("\nFound PLL Pattern: " + PLLSequence+"\n");
+        await doInstruction(PLLSequence);
+    }
+
+    //turn till right
+    while(squareDict["3,0"].slice(0,-2) != "blue"){
+        Rotate1DSquareMatrixClockwise(getFaceArray(updatePiecePos("yellowCC")));
+        await delay(delayTime);
+    }
+}
+
+function isSolved(){
+    for(let key in squareDict){
+        if(squareDict[key] !== finishedCube[key]){
+            return false;
+        }
+    }
+    return true;
 }
