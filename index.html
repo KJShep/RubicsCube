@@ -18,7 +18,10 @@
         <input type='text' id="cubeScreenshotInput" placeholder="Cube Screenshot Text">
         <canvas id="screenshotCanvas" width="300" height="225"></canvas>
         <label id="turnNumberLabel">0</label>
+        <canvas id="avgChart" width="600" height="400"></canvas>
+        <label id="averageLabel">0</label>
 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="script.js"></script>
     </body>
 
@@ -53,6 +56,26 @@
     width: 300px;
     height: 225px;
     border: 1px solid #000;
+}
+
+#avgChart {
+    position: fixed;
+    top: 370px;
+    /*position: absolute;
+    top: 670px;*/
+    right:295px;
+    /*left:0px;*/
+    width: 370px;
+    height: 229px;
+    /*width:900px;
+    height: 500px;*/
+}
+
+#averageLabel {
+    position: fixed;
+    top: 600px;
+    right:474px;
+    
 }
 
         #changeMainCanvasInput {

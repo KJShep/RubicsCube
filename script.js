@@ -6,12 +6,18 @@ var squareSide = 50
 //(ORANGE) (WHITE) (RED) (YELLOW)
 //         (GREEN)
 
-var delayTime = 25 //ms
+var delayTime = 2 //ms
+
+var solvingValues = [];
 
 window.addEventListener('load', (event) => {
     let screenshot = localStorage["screenshot"];
     document.getElementById("cubeScreenshotInput").value = localStorage["screenshot"];
     drawScreenshot(screenshot);
+
+    solvingValues = localStorage["turnNumbers"] ? localStorage["turnNumbers"].split(",").filter(x => x !== "") : [];
+    console.log(solvingValues)
+    graphChart();
 });
 
 
@@ -224,6 +230,7 @@ function drawCube(){
 }
 
 async function printCubeLayout(){
+    return //bc i want to build up my avg
     debugArea.addText("\n");
     debugArea.addText("Cube Screenshot:\n");
     for(let key in squareDict){
@@ -271,11 +278,127 @@ function drawScreenshot(content){//content is String "x,y:spot"
     });
 
     for(const key in map){
+        if(!map[key]) continue;
         const [x, y] = key.split(",").map(Number);
         scc.fillStyle = map[key].slice(0,-2);
         scc.fillRect(x * sccSquareSide, y * sccSquareSide, sccSquareSide, sccSquareSide);
         scc.strokeRect(sccSquareSide*x, sccSquareSide*y, sccSquareSide,sccSquareSide);
     }
+}
+
+//CHART
+async function graphChart() {
+  solvingValues = solvingValues.sort((a, b) => a - b);
+  //const values = [113, 150, 130,115];
+
+  const canvas = document.getElementById("avgChart");
+  const ctx = canvas.getContext("2d");
+
+  const width = canvas.width;
+  const height = canvas.height;
+
+  const padding = 40;
+  //const barWidth = (width - padding * 2) / solvingValues.length;
+
+  //const maxVal = Math.max(...solvingValues);
+
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height);
+
+ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+
+  // Draw axes
+  ctx.beginPath();
+  ctx.moveTo(padding, padding);
+  ctx.lineTo(padding, height - padding);
+  ctx.lineTo(width - padding, height - padding);
+  await ctx.stroke();
+
+
+  if(solvingValues.length == 0){
+    return
+  }
+
+  //map: {solve# : number of times solved that}
+  let frequencyMap = {};
+  for(let i of solvingValues){
+    frequencyMap[i] = (frequencyMap[i] || 0) + 1;
+  }
+
+  const keys = Object.keys(frequencyMap);
+const values = Object.values(frequencyMap);
+
+const barWidth = (width - padding * 2) / values.length;
+const maxVal = Math.max(...values);
+
+values.forEach((val, i) => {
+  const barHeight = (val / maxVal) * (height - padding * 2);
+
+  const x = padding + i * barWidth;
+  const y = height - padding - barHeight;
+
+  ctx.fillStyle = "steelblue";
+  ctx.fillRect(x, y, barWidth * 0.8, barHeight);
+
+
+  // Frequency label
+  ctx.fillStyle = "black";
+  ctx.fillText(val, x + 10, y - 5);
+
+  // Turn count label (IMPORTANT change)
+  //ctx.fillText(keys[i], x + 10, height - padding + 15);
+});
+
+
+  var average = 0;
+  for(var i of solvingValues){
+    average+=Number(i);
+  }
+  average = average/solvingValues.length;
+  average = Math.round(average);
+  console.log(solvingValues);
+  document.getElementById("averageLabel").innerText = average;
+
+
+      // Calculate stats
+const min = Math.min(...solvingValues);
+const max = Math.max(...solvingValues);
+
+
+
+// Draw only min/max labels
+ctx.fillStyle = "black";
+
+ctx.fillText(min, padding, height - padding + 20);
+
+ctx.fillText(
+  max,
+  width - padding - 20,
+  height - padding + 20
+);
+
+// Draw average marker
+//const avgX = valueToX(average);
+const avgIndex = keys.findIndex(k => Number(k) >= average);
+const avgX = padding + avgIndex * barWidth + (barWidth - 10) / 2;
+const avgVal = values[avgIndex];
+const avgBarHeight = (avgVal / maxVal) * (height - padding * 2);
+const avgBarTop = height - padding - avgBarHeight;
+
+ctx.strokeStyle = "red";
+ctx.beginPath();
+ctx.moveTo(avgX, avgBarTop);
+ctx.lineTo(avgX, height - padding);
+ctx.stroke();
+
+// Average label
+ctx.fillStyle = "red";
+ctx.fillText(
+  `Avg ${average}`,
+  avgX - 20,
+  height - padding + 20
+);
 }
 
 //turnNumberLabel
@@ -765,7 +888,7 @@ async function autoPlay(){
         await F2LCFOP();
         await OLLCFOP();
         await PLLCFOP();
-        if(!isSolved()){
+        if(!(await isSolved())){
             autoPlay();
         }
         await delay(1000);
@@ -2171,11 +2294,23 @@ async function PLLCFOP(){
     }
 }
 
-function isSolved(){
+async function isSolved(){
     for(let key in squareDict){
         if(squareDict[key] !== finishedCube[key]){
             return false;
         }
     }
+    solvingValues.push(document.getElementById("turnNumberLabel").textContent);
+
+    let localStorageTurns = localStorage["turnNumbers"];
+    if(localStorageTurns == undefined){
+        localStorageTurns = document.getElementById("turnNumberLabel").textContent + ",";
+    }
+    else{
+        localStorageTurns += document.getElementById("turnNumberLabel").textContent + ",";
+    }
+    localStorage["turnNumbers"] = localStorageTurns; 
+
+    await graphChart();
     return true;
 }
